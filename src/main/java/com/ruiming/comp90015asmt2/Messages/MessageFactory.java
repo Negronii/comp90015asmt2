@@ -1,5 +1,6 @@
 package com.ruiming.comp90015asmt2.Messages;
 
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
 import java.io.BufferedReader;

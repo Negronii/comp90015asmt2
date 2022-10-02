@@ -39,8 +39,7 @@ import java.net.URL;
 import java.util.Date;
 import java.util.ResourceBundle;
 
-import static com.ruiming.comp90015asmt2.Messages.MessageFactory.writeChatMsg;
-import static com.ruiming.comp90015asmt2.Messages.MessageFactory.writeMsg;
+import static com.ruiming.comp90015asmt2.Messages.MessageFactory.*;
 
 public class WhiteBoardController implements Initializable {
     @FXML

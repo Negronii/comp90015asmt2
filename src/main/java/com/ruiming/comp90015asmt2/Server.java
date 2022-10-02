@@ -1,6 +1,7 @@
 package com.ruiming.comp90015asmt2;
 
 import com.ruiming.comp90015asmt2.Messages.*;
+import javafx.scene.layout.VBox;
 
 import java.io.*;
 import java.net.Socket;
@@ -90,7 +91,6 @@ public class Server extends Thread {
             socket.close();
         }
     }
-
 
     public static void main(String[] args) throws IOException {
         new Server().start();
