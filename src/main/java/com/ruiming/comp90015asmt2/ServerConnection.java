@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Collections;
 
 import static com.ruiming.comp90015asmt2.Messages.MessageFactory.*;
 
@@ -29,31 +30,28 @@ public class ServerConnection extends Thread {
     @Override
     public void run() {
         while (!isInterrupted()) {
-            try {
-                Message message = readMsg(bufferedReader);
-                if (message instanceof ErrorMessage) {
-                    System.out.println(message);
-                } else if (message instanceof ApprovalRequestMessage approvalRequestMessage) {
-                    if (message.sender.equals(server.manager)) {
-                        isApproved = true;
-                        writeMsg(server.nameThreadMap.get(approvalRequestMessage.username).bufferedWriter, message);
-                    }
-                } else {
-                    for (String u : server.nameThreadMap.keySet()) {
-                        if (!u.equals(username)) {
-                            writeMsg(server.nameThreadMap.get(u).bufferedWriter, message);
-                        }
-                    }
-                    server.allMessage.add(message);
-                    if (message instanceof QuitMessage) {
-                        server.nameThreadMap.remove(username);
-                        this.interrupt();
-                    }
+            Message message = readMsg(bufferedReader);
+            if (message instanceof ErrorMessage) {
+                System.out.println(message);
+            } else if (message instanceof FetchRequestMessage) {
+                writeMsg(server.nameThreadMap.get(server.manager).bufferedWriter, message);
+            } else if (message instanceof FetchReply fetchReply) {
+                writeMsg(server.nameThreadMap.get(fetchReply.username).bufferedWriter, message);
+            } else if (message instanceof ApprovalRequestMessage approvalRequestMessage) {
+                if (message.sender.equals(server.manager)) {
+                    isApproved = true;
+                    writeMsg(server.nameThreadMap.get(approvalRequestMessage.username).bufferedWriter, message);
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw new RuntimeException(e);
+            } else {
+                for (String u : server.nameThreadMap.keySet()) {
+                    writeMsg(server.nameThreadMap.get(u).bufferedWriter, message);
+                }
+                if (message instanceof QuitMessage) {
+                    server.nameThreadMap.remove(username);
+                    this.interrupt();
+                }
             }
+
         }
     }
 }

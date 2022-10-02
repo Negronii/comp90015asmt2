@@ -62,25 +62,40 @@ public class MessageFactory {
             case "refuse" -> new RefuseRequestMessage(split[1], Long.parseLong(split[2]));
             // a clear screen message should be "clear,sender,timeStamp"
             case "clear" -> new ClearPanelMessage(split[1], Long.parseLong(split[2]));
+            // a fetch request should be "fetch,sender,timeStamp"
+            case "fetch" -> new FetchRequestMessage(split[1], Long.parseLong(split[2]));
+            // a image message should be "image,sender,timeStamp,encodedString"
+            case "image" -> new ImageMessage(split[1], Long.parseLong(split[2]), ImageMessage.decodeToImage(split[3]));
+            // a fetch image message should be "fetchImage,sender,timeStamp,encodedString,targetUsername"
+            case "fetchImage" -> new FetchReply(split[1], Long.parseLong(split[2]), ImageMessage.decodeToImage(split[3]), split[4]);
             default -> null;
         };
     }
 
-    public static void writeMsg(BufferedWriter bufferedWriter, Message msg) throws IOException {
-        System.out.println("sending: " + msg.toString());
-        bufferedWriter.write(msg.toString());
-        bufferedWriter.newLine();
-        bufferedWriter.flush();
+    public static void writeMsg(BufferedWriter bufferedWriter, Message msg){
+        try {
+            System.out.println("sending: " + msg.toString());
+            bufferedWriter.write(msg.toString());
+            bufferedWriter.newLine();
+            bufferedWriter.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public static Message readMsg(BufferedReader bufferedReader) throws IOException {
-        String s = bufferedReader.readLine();
-        if (s != null) {
-            Message msg = parseMessage(s);
-            System.out.println("received: " + msg.toString());
-            return msg;
-        } else {
-            throw new IOException();
+    public static Message readMsg(BufferedReader bufferedReader) {
+        try {
+            String s = bufferedReader.readLine();
+            if (s != null) {
+                Message msg = parseMessage(s);
+                System.out.println("received: " + msg.toString());
+                return msg;
+            } else {
+                throw new IOException();
+            }
+        }catch (IOException e) {
+            throw new RuntimeException(e);
         }
+
     }
 }

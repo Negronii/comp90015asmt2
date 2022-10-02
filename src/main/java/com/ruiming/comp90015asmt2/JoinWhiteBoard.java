@@ -42,6 +42,7 @@ public class JoinWhiteBoard extends Application {
         window.show();
         clientListener = new ClientListener(bufferedReader, bufferedWriter, fxmlLoader.getController());
         clientListener.start();
+        writeMsg(bufferedWriter,new FetchRequestMessage(username,WhiteBoardController.date.getTime()));
     }
 
     @Override

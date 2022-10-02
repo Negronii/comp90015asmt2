@@ -18,14 +18,12 @@ public class Server extends Thread {
     private final IOThread ioThread;
     public String manager;
     public Map<String, ServerConnection> nameThreadMap;
-    public ArrayList<Message> allMessage;
 
     public Server() throws IOException {
         port = 3201;
         timeout = 500000;
         socketDeque = new LinkedBlockingDeque<>();
         nameThreadMap = new HashMap<>();
-        allMessage = new ArrayList<>();
         ioThread = new IOThread(port, socketDeque, timeout);
         ioThread.start();
     }

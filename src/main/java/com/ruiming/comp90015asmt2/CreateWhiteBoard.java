@@ -1,6 +1,7 @@
 package com.ruiming.comp90015asmt2;
 
 import com.ruiming.comp90015asmt2.Messages.CreateRequestMessage;
+import com.ruiming.comp90015asmt2.Messages.FetchRequestMessage;
 import com.ruiming.comp90015asmt2.Messages.MessageFactory;
 import com.ruiming.comp90015asmt2.Messages.QuitMessage;
 import javafx.application.Application;
@@ -62,10 +63,7 @@ public class CreateWhiteBoard extends Application {
             OutputStream outputStream = socket.getOutputStream();
             bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
             bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
-
             writeMsg(bufferedWriter, new CreateRequestMessage(username, WhiteBoardController.date.getTime()));
-
-
         } catch (IOException e) {
             e.printStackTrace();
         }
