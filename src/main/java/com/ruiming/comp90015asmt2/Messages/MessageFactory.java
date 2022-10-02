@@ -73,6 +73,14 @@ public class MessageFactory {
         bufferedWriter.flush();
     }
 
+    public static void writeChatMsg(BufferedWriter bufferedWriter, String msg) throws IOException {
+        System.out.println("sending: " + msg);
+        bufferedWriter.write(msg);
+        bufferedWriter.newLine();
+        bufferedWriter.flush();
+    }
+
+
     public static Message readMsg(BufferedReader bufferedReader) throws IOException {
         String s = bufferedReader.readLine();
         if (s != null) {

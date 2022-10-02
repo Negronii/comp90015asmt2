@@ -2,8 +2,13 @@ package com.ruiming.comp90015asmt2;
 
 import com.ruiming.comp90015asmt2.Messages.*;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -14,9 +19,12 @@ import javafx.scene.image.Image;
 import javax.imageio.ImageIO;
 
 import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -31,6 +39,7 @@ import java.net.URL;
 import java.util.Date;
 import java.util.ResourceBundle;
 
+import static com.ruiming.comp90015asmt2.Messages.MessageFactory.writeChatMsg;
 import static com.ruiming.comp90015asmt2.Messages.MessageFactory.writeMsg;
 
 public class WhiteBoardController implements Initializable {
@@ -54,6 +63,18 @@ public class WhiteBoardController implements Initializable {
 
     @FXML
     private ColorPicker colorPicker;
+
+    @FXML
+    private Button button_send;
+
+    @FXML
+    private VBox vbox_messages;
+
+    @FXML
+    private TextField tf_message;
+
+    @FXML
+    private ScrollPane sp_main;
 
     private int triangleCount = 0;
     private final double[] triangleXs = new double[3];
@@ -107,7 +128,7 @@ public class WhiteBoardController implements Initializable {
     @FXML
     public void onNew() throws IOException {
         canvas.getGraphicsContext2D().clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        writeMsg(bufferedWriter, new ClearPanelMessage(username,date.getTime()));
+        writeMsg(bufferedWriter, new ClearPanelMessage(username, date.getTime()));
     }
 
     @Override
@@ -242,6 +263,66 @@ public class WhiteBoardController implements Initializable {
                         }
                     }
                 }
+            }
+        });
+
+        vbox_messages.heightProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                sp_main.setVvalue((Double) newValue);
+            }
+        });
+
+        button_send.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                String messageToSend = tf_message.getText();
+                if (!messageToSend.isEmpty()) {
+                    HBox hBox = new HBox();
+                    hBox.setAlignment(Pos.CENTER_RIGHT);
+                    hBox.setPadding(new Insets(5, 5, 5, 10));
+
+                    Text text = new Text(messageToSend);
+                    TextFlow textFlow = new TextFlow(text);
+
+                    textFlow.setStyle("-fx-color: rgb(239, 242, 255); " +
+                            "-fx-background-color: rgb(15, 125, 242); " +
+                            "-fx-background-radius: 20px");
+
+                    textFlow.setPadding(new Insets(5, 5, 5, 10));
+                    text.setFill(Color.color(0.934, 0.945, 0.996));
+
+                    hBox.getChildren().add((textFlow));
+                    vbox_messages.getChildren().add(hBox);
+
+                    try {
+                        writeChatMsg(bufferedWriter, messageToSend);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    tf_message.clear();
+                }
+            }
+        });
+    }
+
+    public static void addLabel(String messageFromClient, VBox vbox) {
+        HBox hBox = new HBox();
+        hBox.setAlignment(Pos.CENTER_LEFT);
+        hBox.setPadding(new Insets(5, 5, 5, 10));
+
+        Text text = new Text(messageFromClient);
+        TextFlow textFlow = new TextFlow(text);
+        textFlow.setStyle("-fx-background-color: rgb(233, 233, 235); " +
+                "-fx-background-radius: 20px");
+
+        textFlow.setPadding(new Insets(5, 10, 5, 10));
+        hBox.getChildren().add(textFlow);
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                vbox.getChildren().add(hBox);
             }
         });
     }

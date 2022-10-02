@@ -17,6 +17,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.paint.Color?>
 
+<?import javafx.scene.control.Button?>
 <VBox prefHeight="600" prefWidth="1000" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.ruiming.comp90015asmt2.WhiteBoardController">
     <MenuBar>
@@ -60,6 +61,7 @@
             </Pane>
             <TextArea prefHeight="64.0" prefWidth="265.0" promptText="press enter to send"
                       style="-fx-background-radius: 5; -fx-background-color: grey;"/>
+            <Button>send</Button>
         </VBox>
     </HBox>
 </VBox>
