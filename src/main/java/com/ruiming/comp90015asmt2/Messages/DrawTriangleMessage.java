@@ -7,10 +7,10 @@ public class DrawTriangleMessage extends Message {
     public double[] triangleYs;
     public Color color;
 
-    public DrawTriangleMessage(String sender, long sendTime,
+    public DrawTriangleMessage(String sender,
                                double[] triangleXs, double[] triangleYs,
                                Color color) {
-        super(sender, sendTime);
+        super(sender);
         this.triangleXs = triangleXs;
         this.triangleYs = triangleYs;
         this.color = color;
@@ -18,7 +18,7 @@ public class DrawTriangleMessage extends Message {
 
     @Override
     public String toString() {
-        return "triangle," + sender + "," + sendTime + "," +
+        return "triangle," + sender + "," +
                 triangleXs[0] + "," + triangleXs[1] + "," + triangleXs[2] + "," +
                 triangleYs[0] + "," + triangleYs[1] + "," + triangleYs[2] + "," +
                 color.toString();

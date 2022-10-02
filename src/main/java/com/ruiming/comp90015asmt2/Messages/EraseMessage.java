@@ -5,8 +5,8 @@ public class EraseMessage extends Message {
     public double y;
     public double brushSize;
 
-    public EraseMessage(String sender, long sendTime, double x, double y, double brushSize) {
-        super(sender, sendTime);
+    public EraseMessage(String sender, double x, double y, double brushSize) {
+        super(sender);
         this.x = x;
         this.y = y;
         this.brushSize = brushSize;
@@ -14,6 +14,6 @@ public class EraseMessage extends Message {
 
     @Override
     public String toString() {
-        return "erase," + sender + "," + sendTime + "," + x + "," + y + "," + brushSize;
+        return "erase," + sender + "," + x + "," + y + "," + brushSize;
     }
 }

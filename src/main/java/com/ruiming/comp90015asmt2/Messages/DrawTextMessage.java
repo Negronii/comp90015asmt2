@@ -9,10 +9,10 @@ public class DrawTextMessage extends Message {
     public Color color;
     public double size;
 
-    public DrawTextMessage(String sender, long sendTime,
+    public DrawTextMessage(String sender,
                            double x, double y,
                            String text, Color color, double size) {
-        super(sender, sendTime);
+        super(sender);
         this.x = x;
         this.y = y;
         this.text = text;
@@ -22,7 +22,7 @@ public class DrawTextMessage extends Message {
 
     @Override
     public String toString() {
-        return "text," + sender + "," + sendTime + "," +
+        return "text," + sender + "," +
                 x + "," + y + "," +
                 text + "," + color.toString() + "," +size;
     }
