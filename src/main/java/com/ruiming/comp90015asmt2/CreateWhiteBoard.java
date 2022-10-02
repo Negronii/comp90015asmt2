@@ -4,6 +4,7 @@ import com.ruiming.comp90015asmt2.Messages.CreateRequestMessage;
 import com.ruiming.comp90015asmt2.Messages.MessageFactory;
 import com.ruiming.comp90015asmt2.Messages.QuitMessage;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -23,6 +24,8 @@ public class CreateWhiteBoard extends Application {
     public static BufferedWriter bufferedWriter;
     public static String username;
 
+    ClientListener clientListener;
+
     static Socket socket;
 
     @Override
@@ -33,9 +36,19 @@ public class CreateWhiteBoard extends Application {
         // load fxml
         FXMLLoader fxmlLoader = new FXMLLoader(CreateWhiteBoard.class.getResource("WhiteBoardView.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 1000, 600);
-        window.setTitle("Distributed Shared White Board");
+        window.setTitle("Distributed Shared White Board Manager");
         window.setScene(scene);
         window.show();
+
+        clientListener = new ClientListener(bufferedReader, bufferedWriter, fxmlLoader.getController());
+        clientListener.start();
+    }
+
+    @Override
+    public void stop() throws IOException {
+        writeMsg(bufferedWriter, new QuitMessage(username, WhiteBoardController.date.getTime()));
+        clientListener.interrupt();
+        socket.close();
     }
 
     public static void main(String[] args) throws UnknownHostException {
@@ -60,9 +73,5 @@ public class CreateWhiteBoard extends Application {
         launch();
     }
 
-    @Override
-    public void stop() throws IOException {
-        writeMsg(bufferedWriter, new QuitMessage(username, WhiteBoardController.date.getTime()));
-        socket.close();
-    }
+
 }

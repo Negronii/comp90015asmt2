@@ -76,14 +76,14 @@ public class Server extends Thread {
             }
             manager = msg.sender;
             ServerConnection serverConnection = new ServerConnection(socket, msg.sender, bufferedReader, bufferedWriter, this);
+            serverConnection.isApproved = true;
             nameThreadMap.put(msg.sender, serverConnection);
             serverConnection.start();
         } else if (msg instanceof JoinRequestMessage) {
             ServerConnection serverConnection = new ServerConnection(socket, msg.sender, bufferedReader, bufferedWriter, this);
             nameThreadMap.put(msg.sender, serverConnection);
             serverConnection.start();
-            for (Message m : allMessage)
-                writeMsg(bufferedWriter, m);
+            writeMsg(nameThreadMap.get(manager).bufferedWriter, msg);
         } else {
             // if it is an unexpected message
             writeMsg(bufferedWriter, new ErrorMessage("Server", new Date().getTime(), "invalid request"));

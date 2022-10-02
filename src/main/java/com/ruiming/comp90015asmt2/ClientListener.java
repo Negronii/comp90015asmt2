@@ -1,6 +1,7 @@
 package com.ruiming.comp90015asmt2;
 
 import com.ruiming.comp90015asmt2.Messages.*;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -23,19 +24,18 @@ import static com.ruiming.comp90015asmt2.WhiteBoardController.date;
 public class ClientListener extends Thread {
     BufferedReader bufferedReader;
     BufferedWriter bufferedWriter;
-    GraphicsContext g;
 
-    String username;
+    WhiteBoardController whiteBoardController;
 
-    public ClientListener(BufferedReader bufferedReader, BufferedWriter bufferedWriter, GraphicsContext g, String username) {
+    public ClientListener(BufferedReader bufferedReader, BufferedWriter bufferedWriter, WhiteBoardController whiteBoardController) {
         this.bufferedReader = bufferedReader;
         this.bufferedWriter = bufferedWriter;
-        this.g = g;
-        this.username = username;
+        this.whiteBoardController = whiteBoardController;
     }
 
     @Override
     public void run() {
+        GraphicsContext g = whiteBoardController.canvas.getGraphicsContext2D();
         while (!isInterrupted()) {
             try {
                 Message message = readMsg(bufferedReader);
@@ -60,8 +60,44 @@ public class ClientListener extends Thread {
                     g.clearRect(eraseMessage.x, eraseMessage.y, eraseMessage.brushSize, eraseMessage.brushSize);
                 } else if (message instanceof QuitMessage quitMessage) {
                     // to be implemented
+                } else if (message instanceof ClearPanelMessage) {
+                    g.clearRect(0, 0, whiteBoardController.canvas.getWidth(), whiteBoardController.canvas.getHeight());;
                 } else if (message instanceof JoinRequestMessage joinRequestMessage) {
-                    //
+                    Platform.runLater(() -> {
+                        Stage window = new Stage();
+                        window.initModality(Modality.APPLICATION_MODAL); //make user deal with alert first
+                        window.setTitle("new User Join Request");
+                        window.setWidth(250);
+                        Label label = new Label();
+                        label.setText(message.sender + " want to join the white board");
+                        Button acceptButton = new Button();
+                        acceptButton.setText("Accept");
+                        acceptButton.setOnAction(e -> {
+                            try {
+                                writeMsg(bufferedWriter, new ApprovalRequestMessage(whiteBoardController.username, date.getTime(), message.sender));
+                            } catch (IOException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                            window.close();
+                        }); //window.close() to close the stage
+                        Button closeButton = new Button();
+                        closeButton.setText("Refuse");
+                        closeButton.setOnAction(e -> {
+                            try {
+                                writeMsg(bufferedWriter, new RefuseRequestMessage(whiteBoardController.username, date.getTime()));
+                            } catch (IOException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                            window.close();
+                        });
+
+                        VBox layout = new VBox(10);
+                        layout.getChildren().addAll(label,acceptButton, closeButton);
+                        layout.setAlignment(Pos.CENTER);
+                        Scene scene = new Scene(layout);
+                        window.setScene(scene);
+                        window.showAndWait(); // wait until user close stage
+                    });
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);

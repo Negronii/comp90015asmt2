@@ -58,6 +58,10 @@ public class MessageFactory {
             case "user" -> new FetchUserMessage(split[1], Long.parseLong(split[2]), split[3]);
             // an error message should be "error,Sender,timeStamp,errorMsg"
             case "error" -> new ErrorMessage(split[1], Long.parseLong(split[2]), split[3]);
+            // a refuse message should be "refuse,sender,timeStamp"
+            case "refuse" -> new RefuseRequestMessage(split[1], Long.parseLong(split[2]));
+            // a clear screen message should be "clear,sender,timeStamp"
+            case "clear" -> new ClearPanelMessage(split[1], Long.parseLong(split[2]));
             default -> null;
         };
     }

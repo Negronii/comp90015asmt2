@@ -35,6 +35,7 @@ public class ServerConnection extends Thread {
                     System.out.println(message);
                 } else if (message instanceof ApprovalRequestMessage approvalRequestMessage) {
                     if (message.sender.equals(server.manager)) {
+                        isApproved = true;
                         writeMsg(server.nameThreadMap.get(approvalRequestMessage.username).bufferedWriter, message);
                     }
                 } else {

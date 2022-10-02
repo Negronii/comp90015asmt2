@@ -47,7 +47,7 @@ public class WhiteBoardController implements Initializable {
     private Slider slider;
 
     @FXML
-    private Canvas canvas;
+    public Canvas canvas;
 
     @FXML
     private ComboBox<String> tool;
@@ -66,7 +66,6 @@ public class WhiteBoardController implements Initializable {
     BufferedWriter bufferedWriter;
     String username;
 
-    public static ClientListener clientListener;
 
     public static boolean isManager = false;
 
@@ -89,7 +88,6 @@ public class WhiteBoardController implements Initializable {
 
     @FXML
     public void onExit() {
-        clientListener.interrupt();
         Platform.exit();
     }
 
@@ -107,19 +105,17 @@ public class WhiteBoardController implements Initializable {
     }
 
     @FXML
-    public void onNew() {
+    public void onNew() throws IOException {
         canvas.getGraphicsContext2D().clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        writeMsg(bufferedWriter, new ClearPanelMessage(username,date.getTime()));
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         GraphicsContext g = canvas.getGraphicsContext2D();
-        BufferedReader bufferedReader = (isManager) ? CreateWhiteBoard.bufferedReader : JoinWhiteBoard.bufferedReader;
         bufferedWriter = (isManager) ? CreateWhiteBoard.bufferedWriter : JoinWhiteBoard.bufferedWriter;
         username = (isManager) ? CreateWhiteBoard.username : JoinWhiteBoard.username;
         window = (isManager) ? CreateWhiteBoard.window : JoinWhiteBoard.window;
-        clientListener = new ClientListener(bufferedReader, bufferedWriter, g, username);
-        clientListener.start();
         tool.getItems().addAll("Free-hand", "Eraser", "Line", "Circle", "Triangle", "Rectangle", "Text");
         textInput.setVisible(false);
         tool.getSelectionModel().selectedIndexProperty().addListener((v, oldValue, newValue) -> {
