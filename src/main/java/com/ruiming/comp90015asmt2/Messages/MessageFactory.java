@@ -67,7 +67,7 @@ public class MessageFactory {
             // a image message should be "image,sender,timeStamp,encodedString"
             case "image" -> new ImageMessage(split[1], Long.parseLong(split[2]), ImageMessage.decodeToImage(split[3]));
             // a fetch image message should be "fetchImage,sender,timeStamp,encodedString,targetUsername"
-            case "fetchImage" -> new FetchReply(split[1], Long.parseLong(split[2]), ImageMessage.decodeToImage(split[3]), split[4]);
+            case "fetchImage" -> new FetchReplyMessage(split[1], Long.parseLong(split[2]), ImageMessage.decodeToImage(split[3]), split[4]);
             default -> null;
         };
     }

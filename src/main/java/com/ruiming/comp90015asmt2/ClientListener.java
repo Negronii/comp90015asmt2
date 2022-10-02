@@ -2,21 +2,23 @@ package com.ruiming.comp90015asmt2;
 
 import com.ruiming.comp90015asmt2.Messages.*;
 import javafx.application.Platform;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.IOException;
 
 import static com.ruiming.comp90015asmt2.Messages.MessageFactory.readMsg;
 import static com.ruiming.comp90015asmt2.Messages.MessageFactory.writeMsg;
@@ -64,14 +66,39 @@ public class ClientListener extends Thread {
                 g.clearRect(0, 0, whiteBoardController.canvas.getWidth(), whiteBoardController.canvas.getHeight());
             } else if (message instanceof ImageMessage imageMessage) {
                 whiteBoardController.canvas.getGraphicsContext2D().drawImage(imageMessage.image, 0, 0);
+            } else if (message instanceof FetchUserMessage fetchUserMessage) {
+                boolean isSelf = fetchUserMessage.username.equals(whiteBoardController.username);
+                HBox hBox = new HBox();
+                hBox.setAlignment(Pos.CENTER);
+                hBox.setPadding(new Insets(5, 5, 5, 10));
+                Text text = new Text(fetchUserMessage.username);
+                TextFlow textFlow = new TextFlow(text);
+                textFlow.setStyle("-fx-color: black; -fx-background-color: White; -fx-background-radius: 20;");
+                textFlow.setPadding(new Insets(5, 10, 5, 10));
+                if (!isSelf) hBox.getChildren().add(new Text("Me: "));
+                hBox.getChildren().add(textFlow);
+                Platform.runLater(() -> whiteBoardController.vbox_user.getChildren().add(hBox));
             } else if (message instanceof FetchRequestMessage) {
                 Platform.runLater(() -> {
                     Image snapShot = whiteBoardController.canvas.snapshot(null, null);
-                    writeMsg(bufferedWriter, new FetchReply(whiteBoardController.username, date.getTime(), snapShot, message.sender));
+                    writeMsg(bufferedWriter, new FetchReplyMessage(whiteBoardController.username, date.getTime(), snapShot, message.sender));
                 });
-            } else if (message instanceof FetchReply fetchReply) {
-                whiteBoardController.canvas.getGraphicsContext2D().drawImage(fetchReply.image, 0, 0);
-            } else if (message instanceof JoinRequestMessage joinRequestMessage) {
+            } else if (message instanceof FetchReplyMessage fetchReplyMessage) {
+                whiteBoardController.canvas.getGraphicsContext2D().drawImage(fetchReplyMessage.image, 0, 0);
+            } else if (message instanceof ChatMessage chatMessage) {
+                boolean isSelf = message.sender.equals(whiteBoardController.username);
+                HBox hBox = new HBox();
+                hBox.setAlignment(isSelf ? Pos.CENTER_RIGHT : Pos.CENTER_LEFT);
+                hBox.setPadding(new Insets(5, 5, 5, 10));
+                Text text = new Text(chatMessage.chatContent);
+                TextFlow textFlow = new TextFlow(text);
+                textFlow.setStyle(!isSelf ? "-fx-color: black; -fx-background-color: White; -fx-background-radius: 20" :
+                        "-fx-background-color: #43CC47; -fx-color: Black; -fx-background-radius: 20;");
+                textFlow.setPadding(new Insets(5, 10, 5, 10));
+                if (!isSelf) hBox.getChildren().add(new Text(message.sender + ": "));
+                hBox.getChildren().add(textFlow);
+                Platform.runLater(() -> whiteBoardController.vbox_chat.getChildren().add(hBox));
+            } else if (message instanceof JoinRequestMessage) {
                 Platform.runLater(() -> {
                     Stage window = new Stage();
                     window.initModality(Modality.APPLICATION_MODAL); //make user deal with alert first

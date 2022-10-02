@@ -4,6 +4,7 @@ import com.ruiming.comp90015asmt2.Messages.*;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -14,9 +15,13 @@ import javafx.scene.image.Image;
 import javax.imageio.ImageIO;
 
 import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.input.KeyCode;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -35,10 +40,19 @@ public class WhiteBoardController implements Initializable {
     public TextField textInput;
 
     @FXML
-    public Label chatRoomLabel;
+    public ScrollPane sp_user;
 
     @FXML
-    public ListView<String> usersInBoard;
+    public ScrollPane sp_chat;
+
+    @FXML
+    public VBox vbox_user;
+
+    @FXML
+    public VBox vbox_chat;
+
+    @FXML
+    public TextArea textEntered;
 
     @FXML
     private Slider slider;
@@ -103,7 +117,7 @@ public class WhiteBoardController implements Initializable {
     }
 
     @FXML
-    public void onNew() throws IOException {
+    public void onNew() {
         canvas.getGraphicsContext2D().clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         writeMsg(bufferedWriter, new ClearPanelMessage(username, date.getTime()));
     }
@@ -116,6 +130,25 @@ public class WhiteBoardController implements Initializable {
         window = (isManager) ? CreateWhiteBoard.window : JoinWhiteBoard.window;
         tool.getItems().addAll("Free-hand", "Eraser", "Line", "Circle", "Triangle", "Rectangle", "Text");
         textInput.setVisible(false);
+
+        vbox_user.heightProperty().addListener((v, oldValue, newValue) -> sp_user.setVvalue((double) newValue));
+        vbox_chat.heightProperty().addListener((v, oldValue, newValue) -> sp_chat.setVvalue((double) newValue));
+
+        textEntered.setOnKeyPressed(e -> {
+            if (e.getCode().equals(KeyCode.ENTER)) {
+                String toSend = textEntered.getText();
+                StringBuilder stringBuilder = new StringBuilder();
+                for (char c : toSend.toCharArray())
+                    if (c != '\n' && c != ',')
+                        stringBuilder.append(c);
+                toSend = stringBuilder.toString();
+                if (!toSend.isEmpty() && !toSend.equals("\n")) {
+                    writeMsg(bufferedWriter, new ChatMessage(username, date.getTime(), toSend));
+                    textEntered.clear();
+                }
+            }
+        });
+
         tool.getSelectionModel().selectedIndexProperty().addListener((v, oldValue, newValue) -> {
             newPoint = true;
             Arrays.fill(point, 0);

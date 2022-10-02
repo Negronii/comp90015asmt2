@@ -77,6 +77,7 @@ public class Server extends Thread {
             serverConnection.isApproved = true;
             nameThreadMap.put(msg.sender, serverConnection);
             serverConnection.start();
+            writeMsg(bufferedWriter, new FetchUserMessage("System", new Date().getTime(), manager));
         } else if (msg instanceof JoinRequestMessage) {
             ServerConnection serverConnection = new ServerConnection(socket, msg.sender, bufferedReader, bufferedWriter, this);
             nameThreadMap.put(msg.sender, serverConnection);
