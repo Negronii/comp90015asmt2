@@ -56,6 +56,9 @@ public class ServerConnection extends Thread {
                     server.nameThreadMap.remove(username);
                     this.interrupt();
                 }
+                if (message instanceof ManagerQuitMessage)
+                    server.nameThreadMap.clear();
+                this.interrupt();
             }
 
         }

@@ -79,6 +79,7 @@ public class WhiteBoardController implements Initializable {
     BufferedWriter bufferedWriter;
     String username;
 
+    public String lastTime;
 
     public static boolean isManager = false;
 

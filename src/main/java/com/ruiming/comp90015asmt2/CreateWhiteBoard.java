@@ -1,9 +1,6 @@
 package com.ruiming.comp90015asmt2;
 
-import com.ruiming.comp90015asmt2.Messages.CreateRequestMessage;
-import com.ruiming.comp90015asmt2.Messages.FetchRequestMessage;
-import com.ruiming.comp90015asmt2.Messages.MessageFactory;
-import com.ruiming.comp90015asmt2.Messages.QuitMessage;
+import com.ruiming.comp90015asmt2.Messages.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;

@@ -20,7 +20,7 @@ public class MessageFactory {
         return switch (split[0]) {
             // an approval message should be "approval,sender,username"
             case "approval" -> new ApprovalRequestMessage(split[1], split[2]);
-            // a chat message should be "chat,username,timeStamp,text"
+            // a chat message should be "chat,username,text"
             case "chat" -> new ChatMessage(split[1], split[2]);
             // a creation message should be "create,username"
             case "create" -> new CreateRequestMessage(split[1]);
@@ -58,7 +58,7 @@ public class MessageFactory {
             // a fetch user message should be "user,sender,userName"
             case "user" -> new FetchUserMessage(split[1], split[2]);
             // an error message should be "error,Sender,errorMsg"
-            case "error" -> new ErrorMessage(split[1],  split[2]);
+            case "error" -> new ErrorMessage(split[1], split[2]);
             // a refuse message should be "refuse,sender"
             case "refuse" -> new RefuseRequestMessage(split[1]);
             // a clear screen message should be "clear,sender"
@@ -98,6 +98,5 @@ public class MessageFactory {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
     }
 }
