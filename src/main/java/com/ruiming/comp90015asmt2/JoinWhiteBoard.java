@@ -42,20 +42,20 @@ public class JoinWhiteBoard extends Application {
         window.show();
         clientListener = new ClientListener(bufferedReader, bufferedWriter, fxmlLoader.getController());
         clientListener.start();
-        writeMsg(bufferedWriter,new FetchRequestMessage(username,WhiteBoardController.date.getTime()));
+        writeMsg(bufferedWriter,new FetchRequestMessage(username));
     }
 
     @Override
     public void stop() throws IOException {
-        writeMsg(bufferedWriter, new QuitMessage(username, WhiteBoardController.date.getTime()));
+        writeMsg(bufferedWriter, new QuitMessage(username));
         clientListener.interrupt();
         socket.close();
     }
 
     public static void main(String[] args) throws UnknownHostException {
-        username = "hello1";
-        InetAddress idxAddress = InetAddress.getByName("localhost");
-        int idxPort = 3201;
+        username = args[0];
+        InetAddress idxAddress = InetAddress.getByName(args[1]);
+        int idxPort = Integer.parseInt(args[2]);
         try {
             socket = new Socket(idxAddress, idxPort);
             // set up reader and writer for IO stream
@@ -64,7 +64,7 @@ public class JoinWhiteBoard extends Application {
             bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
             bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
 
-            writeMsg(bufferedWriter, new JoinRequestMessage(username, new Date().getTime()));
+            writeMsg(bufferedWriter, new JoinRequestMessage(username));
             Message msg = readMsg(bufferedReader);
             System.out.println("Please wait for manager to approve");
             if (msg instanceof ApprovalRequestMessage) launch();

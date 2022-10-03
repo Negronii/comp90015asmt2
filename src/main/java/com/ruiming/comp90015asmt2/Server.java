@@ -12,19 +12,17 @@ import static com.ruiming.comp90015asmt2.Messages.MessageFactory.readMsg;
 import static com.ruiming.comp90015asmt2.Messages.MessageFactory.writeMsg;
 
 public class Server extends Thread {
-    private final int port;
     private final int timeout;
     private final LinkedBlockingDeque<Socket> socketDeque;
     private final IOThread ioThread;
     public String manager;
     public Map<String, ServerConnection> nameThreadMap;
 
-    public Server() throws IOException {
-        port = 3201;
+    public Server(int port) throws IOException {
         timeout = 500000;
         socketDeque = new LinkedBlockingDeque<>();
         nameThreadMap = new HashMap<>();
-        ioThread = new IOThread(port, socketDeque, timeout);
+        ioThread = new IOThread(port, socketDeque);
         ioThread.start();
     }
 
@@ -62,13 +60,13 @@ public class Server extends Thread {
         // read the message and deal with each message time
         Message msg = readMsg(bufferedReader);
         if (nameThreadMap.containsKey(msg.sender)) {
-            writeMsg(bufferedWriter, new ErrorMessage("Server", new Date().getTime(), "username occupied"));
+            writeMsg(bufferedWriter, new ErrorMessage("Server", "username occupied"));
             socket.close();
             return;
         }
         if (msg instanceof CreateRequestMessage) {
             if (nameThreadMap.size() > 0) {
-                writeMsg(bufferedWriter, new ErrorMessage("Server", new Date().getTime(), "server occupied"));
+                writeMsg(bufferedWriter, new ErrorMessage("Server", "server occupied"));
                 socket.close();
                 return;
             }
@@ -77,7 +75,7 @@ public class Server extends Thread {
             serverConnection.isApproved = true;
             nameThreadMap.put(msg.sender, serverConnection);
             serverConnection.start();
-            writeMsg(bufferedWriter, new FetchUserMessage("System", new Date().getTime(), manager));
+            writeMsg(bufferedWriter, new FetchUserMessage("System", manager));
         } else if (msg instanceof JoinRequestMessage) {
             ServerConnection serverConnection = new ServerConnection(socket, msg.sender, bufferedReader, bufferedWriter, this);
             nameThreadMap.put(msg.sender, serverConnection);
@@ -85,13 +83,13 @@ public class Server extends Thread {
             writeMsg(nameThreadMap.get(manager).bufferedWriter, msg);
         } else {
             // if it is an unexpected message
-            writeMsg(bufferedWriter, new ErrorMessage("Server", new Date().getTime(), "invalid request"));
+            writeMsg(bufferedWriter, new ErrorMessage("Server", "invalid request"));
             socket.close();
         }
     }
 
 
     public static void main(String[] args) throws IOException {
-        new Server().start();
+        new Server(Integer.parseInt(args[0])).start();
     }
 }

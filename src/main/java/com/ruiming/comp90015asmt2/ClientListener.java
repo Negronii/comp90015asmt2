@@ -19,6 +19,8 @@ import javafx.stage.Stage;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import static com.ruiming.comp90015asmt2.Messages.MessageFactory.readMsg;
 import static com.ruiming.comp90015asmt2.Messages.MessageFactory.writeMsg;
@@ -29,6 +31,10 @@ public class ClientListener extends Thread {
     BufferedWriter bufferedWriter;
 
     WhiteBoardController whiteBoardController;
+
+    String manager;
+
+    String time = "";
 
     public ClientListener(BufferedReader bufferedReader, BufferedWriter bufferedWriter, WhiteBoardController whiteBoardController) {
         this.bufferedReader = bufferedReader;
@@ -48,7 +54,7 @@ public class ClientListener extends Thread {
                 g.setFill(drawCircleMessage.color);
                 g.fillOval(drawCircleMessage.x, drawCircleMessage.y, drawCircleMessage.width, drawCircleMessage.height);
             } else if (message instanceof DrawLineMessage drawLineMessage) {
-                g.setFill(drawLineMessage.color);
+                g.setStroke(drawLineMessage.color);
                 g.setLineWidth(drawLineMessage.width);
                 g.strokeLine(drawLineMessage.startX, drawLineMessage.startY, drawLineMessage.endX, drawLineMessage.endY);
             } else if (message instanceof DrawTextMessage drawTextMessage) {
@@ -60,8 +66,14 @@ public class ClientListener extends Thread {
                 g.fillPolygon(drawTriangleMessage.triangleXs, drawTriangleMessage.triangleYs, 3);
             } else if (message instanceof EraseMessage eraseMessage) {
                 g.clearRect(eraseMessage.x, eraseMessage.y, eraseMessage.brushSize, eraseMessage.brushSize);
-            } else if (message instanceof QuitMessage quitMessage) {
-                // to be implemented
+            } else if (message instanceof QuitMessage) {
+                if (message.sender.equals(manager))
+                    Platform.runLater(() -> {
+                        whiteBoardController.showAlert("Manager leave", "The white board is closing");
+                        whiteBoardController.onExit();
+                    });
+                else
+                    Platform.runLater(() -> whiteBoardController.removeUser(message.sender));
             } else if (message instanceof ClearPanelMessage) {
                 g.clearRect(0, 0, whiteBoardController.canvas.getWidth(), whiteBoardController.canvas.getHeight());
             } else if (message instanceof ImageMessage imageMessage) {
@@ -81,11 +93,25 @@ public class ClientListener extends Thread {
             } else if (message instanceof FetchRequestMessage) {
                 Platform.runLater(() -> {
                     Image snapShot = whiteBoardController.canvas.snapshot(null, null);
-                    writeMsg(bufferedWriter, new FetchReplyMessage(whiteBoardController.username, date.getTime(), snapShot, message.sender));
+                    writeMsg(bufferedWriter, new FetchReplyMessage(whiteBoardController.username, snapShot, message.sender));
                 });
             } else if (message instanceof FetchReplyMessage fetchReplyMessage) {
+                manager = fetchReplyMessage.sender;
                 whiteBoardController.canvas.getGraphicsContext2D().drawImage(fetchReplyMessage.image, 0, 0);
             } else if (message instanceof ChatMessage chatMessage) {
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
+                LocalDateTime now = LocalDateTime.now();
+                String curTime = dtf.format(now);
+                if (!time.equals(curTime)) {
+                    HBox hBox = new HBox();
+                    hBox.setAlignment(Pos.CENTER);
+                    hBox.setPadding(new Insets(5, 5, 5, 10));
+                    Text timeText = new Text(curTime);
+                    timeText.setStyle("-fx-color: Grey");
+                    hBox.getChildren().add(timeText);
+                    time = curTime;
+                    Platform.runLater(() -> whiteBoardController.vbox_chat.getChildren().add(hBox));
+                }
                 boolean isSelf = message.sender.equals(whiteBoardController.username);
                 HBox hBox = new HBox();
                 hBox.setAlignment(isSelf ? Pos.CENTER_RIGHT : Pos.CENTER_LEFT);
@@ -109,13 +135,13 @@ public class ClientListener extends Thread {
                     Button acceptButton = new Button();
                     acceptButton.setText("Accept");
                     acceptButton.setOnAction(e -> {
-                        writeMsg(bufferedWriter, new ApprovalRequestMessage(whiteBoardController.username, date.getTime(), message.sender));
+                        writeMsg(bufferedWriter, new ApprovalRequestMessage(whiteBoardController.username, message.sender));
                         window.close();
                     }); //window.close() to close the stage
                     Button closeButton = new Button();
                     closeButton.setText("Refuse");
                     closeButton.setOnAction(e -> {
-                        writeMsg(bufferedWriter, new RefuseRequestMessage(whiteBoardController.username, date.getTime()));
+                        writeMsg(bufferedWriter, new RefuseRequestMessage(whiteBoardController.username));
                         window.close();
                     });
 

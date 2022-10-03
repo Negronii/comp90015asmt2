@@ -6,14 +6,14 @@ public class FetchReplyMessage extends Message {
     public Image image;
     public String username;
 
-    public FetchReplyMessage(String sender, long sendTime, Image image, String username) {
-        super(sender, sendTime);
+    public FetchReplyMessage(String sender, Image image, String username) {
+        super(sender);
         this.image = image;
         this.username = username;
     }
 
     @Override
     public String toString() {
-        return "fetchImage," + sender + "," + sendTime + "," + ImageMessage.encodeToString(image) + "," + username;
+        return "fetchImage," + sender + "," + ImageMessage.encodeToString(image) + "," + username;
     }
 }

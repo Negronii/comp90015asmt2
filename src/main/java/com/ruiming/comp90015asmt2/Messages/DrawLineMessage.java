@@ -10,11 +10,11 @@ public class DrawLineMessage extends Message {
     public double width;
     public Color color;
 
-    public DrawLineMessage(String sender, long sendTime,
+    public DrawLineMessage(String sender,
                            double startX, double startY,
                            double endX, double endY,
                            double width, Color color) {
-        super(sender, sendTime);
+        super(sender);
         this.startX = startX;
         this.startY = startY;
         this.endX = endX;
@@ -25,7 +25,7 @@ public class DrawLineMessage extends Message {
 
     @Override
     public String toString() {
-        return "line," + sender + "," + sendTime + "," +
+        return "line," + sender + "," +
                 startX + "," + startY + "," +
                 endX + "," + endY + "," +
                 width + "," + color.toString();

@@ -47,15 +47,15 @@ public class CreateWhiteBoard extends Application {
 
     @Override
     public void stop() throws IOException {
-        writeMsg(bufferedWriter, new QuitMessage(username, WhiteBoardController.date.getTime()));
+        writeMsg(bufferedWriter, new QuitMessage(username));
         clientListener.interrupt();
         socket.close();
     }
 
     public static void main(String[] args) throws UnknownHostException {
-        username = "hello";
-        InetAddress idxAddress = InetAddress.getByName("localhost");
-        int idxPort = 3201;
+        username = args[0];
+        InetAddress idxAddress = InetAddress.getByName(args[1]);
+        int idxPort = Integer.parseInt(args[2]);
         try {
             socket = new Socket(idxAddress, idxPort);
             // set up reader and writer for IO stream
@@ -63,7 +63,7 @@ public class CreateWhiteBoard extends Application {
             OutputStream outputStream = socket.getOutputStream();
             bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
             bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
-            writeMsg(bufferedWriter, new CreateRequestMessage(username, WhiteBoardController.date.getTime()));
+            writeMsg(bufferedWriter, new CreateRequestMessage(username));
         } catch (IOException e) {
             e.printStackTrace();
         }

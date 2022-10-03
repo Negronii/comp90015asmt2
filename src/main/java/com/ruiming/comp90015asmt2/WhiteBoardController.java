@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -113,18 +114,17 @@ public class WhiteBoardController implements Initializable {
         if (selectedFile == null) return;
         Image img = SwingFXUtils.toFXImage(ImageIO.read(selectedFile), null);
         canvas.getGraphicsContext2D().drawImage(img, 0, 0);
-        writeMsg(bufferedWriter,new ImageMessage(username,date.getTime(),img));
+        writeMsg(bufferedWriter, new ImageMessage(username, img));
     }
 
     @FXML
     public void onNew() {
         canvas.getGraphicsContext2D().clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        writeMsg(bufferedWriter, new ClearPanelMessage(username, date.getTime()));
+        writeMsg(bufferedWriter, new ClearPanelMessage(username));
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        GraphicsContext g = canvas.getGraphicsContext2D();
         bufferedWriter = (isManager) ? CreateWhiteBoard.bufferedWriter : JoinWhiteBoard.bufferedWriter;
         username = (isManager) ? CreateWhiteBoard.username : JoinWhiteBoard.username;
         window = (isManager) ? CreateWhiteBoard.window : JoinWhiteBoard.window;
@@ -143,7 +143,7 @@ public class WhiteBoardController implements Initializable {
                         stringBuilder.append(c);
                 toSend = stringBuilder.toString();
                 if (!toSend.isEmpty() && !toSend.equals("\n")) {
-                    writeMsg(bufferedWriter, new ChatMessage(username, date.getTime(), toSend));
+                    writeMsg(bufferedWriter, new ChatMessage(username, toSend));
                     textEntered.clear();
                 }
             }
@@ -161,9 +161,7 @@ public class WhiteBoardController implements Initializable {
             }
         });
 
-        window.setOnCloseRequest(e -> {
-            onExit();
-        });
+        window.setOnCloseRequest(e -> onExit());
 
         canvas.setOnMouseDragged(e -> {
             if (tool.getValue() == null) {
@@ -178,13 +176,13 @@ public class WhiteBoardController implements Initializable {
                     else {
                         Color color = colorPicker.getValue();
                         double size = slider.getValue();
-                        writeMsg(bufferedWriter, new DrawLineMessage(username, date.getTime(), point[0],
+                        writeMsg(bufferedWriter, new DrawLineMessage(username, point[0],
                                 point[1], x, y, size, color));
                     }
                     point[0] = x;
                     point[1] = y;
                 } else if (tool.getValue().equals("Eraser")) {
-                    writeMsg(bufferedWriter, new EraseMessage(username, date.getTime(), x, y, brushSize));
+                    writeMsg(bufferedWriter, new EraseMessage(username, x, y, brushSize));
                 }
             }
         });
@@ -207,24 +205,24 @@ public class WhiteBoardController implements Initializable {
                     double startY = Math.min(point[1], y);
                     Color color = colorPicker.getValue();
                     if (tool.getValue().equals("Rectangle")) {
-                        writeMsg(bufferedWriter, new DrawRectMessage(username, date.getTime(),
+                        writeMsg(bufferedWriter, new DrawRectMessage(username,
                                 startX, startY, width, height, color));
                     }
                     if (tool.getValue().equals("Circle")) {
-                        writeMsg(bufferedWriter, new DrawCircleMessage(username, date.getTime(),
+                        writeMsg(bufferedWriter, new DrawCircleMessage(username,
                                 startX, startY, width, height, color));
                     }
 
                 } else if (tool.getValue().equals("Line")) {
                     Color color = colorPicker.getValue();
                     double size = slider.getValue();
-                    writeMsg(bufferedWriter, new DrawLineMessage(username, date.getTime(), point[0],
+                    writeMsg(bufferedWriter, new DrawLineMessage(username, point[0],
                             point[1], x, y, size, color));
                 } else if (tool.getValue().equals("Triangle")) {
                     triangleXs[triangleCount] = x;
                     triangleYs[triangleCount] = y;
                     if (++triangleCount == 3) {
-                        writeMsg(bufferedWriter, new DrawTriangleMessage(username, date.getTime(),
+                        writeMsg(bufferedWriter, new DrawTriangleMessage(username,
                                 triangleXs, triangleYs, colorPicker.getValue()));
                         triangleCount = 0;
                     }
@@ -232,7 +230,7 @@ public class WhiteBoardController implements Initializable {
                     if (textInput.getText().equals("")) {
                         showAlert("No text entered", "Please enter text field besides slider");
                     } else {
-                        writeMsg(bufferedWriter, new DrawTextMessage(username, date.getTime(), x, y,
+                        writeMsg(bufferedWriter, new DrawTextMessage(username, x, y,
                                 textInput.getText(), colorPicker.getValue(), slider.getValue()));
                     }
                 } else if (tool.getValue().equals("Free-hand")) {
@@ -261,9 +259,17 @@ public class WhiteBoardController implements Initializable {
         window.showAndWait(); // wait until user close stage
     }
 
-
-
-
-
+    public void removeUser(String username) {
+        Node tobeDelete = null;
+        for (Node node : vbox_user.getChildren())
+            if (node instanceof HBox hBox)
+                for (Node node1 : hBox.getChildren())
+                    if (node1 instanceof TextFlow textFlow)
+                        for (Node node2 : textFlow.getChildren())
+                            if (node2 instanceof Text text)
+                                if (text.getText().equals(username))
+                                    tobeDelete = node;
+        vbox_user.getChildren().remove(tobeDelete);
+    }
 
 }

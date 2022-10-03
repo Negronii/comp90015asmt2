@@ -38,9 +38,9 @@ public class ServerConnection extends Thread {
                 BufferedWriter newUser = server.nameThreadMap.get(fetchReplyMessage.username).bufferedWriter;
                 writeMsg(newUser, message);
                 for (String s : server.nameThreadMap.keySet()) {
-                    writeMsg(newUser, new FetchUserMessage("System", new Date().getTime(), s));
+                    writeMsg(newUser, new FetchUserMessage("System", s));
                     if (!s.equals(fetchReplyMessage.username)) {
-                        writeMsg(server.nameThreadMap.get(s).bufferedWriter, new FetchUserMessage("System", new Date().getTime(), fetchReplyMessage.username));
+                        writeMsg(server.nameThreadMap.get(s).bufferedWriter, new FetchUserMessage("System", fetchReplyMessage.username));
                     }
                 }
             } else if (message instanceof ApprovalRequestMessage approvalRequestMessage) {

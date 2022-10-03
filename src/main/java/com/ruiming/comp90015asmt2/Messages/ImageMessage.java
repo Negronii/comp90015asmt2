@@ -10,17 +10,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Base64;
 
-public class ImageMessage extends Message{
+public class ImageMessage extends Message {
     public Image image;
 
-    public ImageMessage(String sender, long sendTime, Image image) {
-        super(sender, sendTime);
+    public ImageMessage(String sender, Image image) {
+        super(sender);
         this.image = image;
     }
 
     @Override
     public String toString() {
-        return "image,"+sender+","+sendTime+","+encodeToString(image);
+        return "image," + sender + "," + encodeToString(image);
     }
 
     public static Image decodeToImage(String imageString) {
