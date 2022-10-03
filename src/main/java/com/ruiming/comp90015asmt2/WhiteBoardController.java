@@ -245,7 +245,6 @@ public class WhiteBoardController implements Initializable {
         Stage window = new Stage();
         window.initModality(Modality.APPLICATION_MODAL); //make user deal with alert first
         window.setTitle(title);
-        window.setWidth(250);
         Label label = new Label();
         label.setText(message);
         Button closeButton = new Button();
@@ -255,6 +254,8 @@ public class WhiteBoardController implements Initializable {
         layout.getChildren().addAll(label, closeButton);
         layout.setAlignment(Pos.CENTER);
         Scene scene = new Scene(layout);
+        window.setWidth(300);
+        window.setHeight(100);
         window.setScene(scene);
         window.showAndWait(); // wait until user close stage
     }

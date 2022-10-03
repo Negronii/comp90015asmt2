@@ -48,6 +48,13 @@ public class ServerConnection extends Thread {
                     isApproved = true;
                     writeMsg(server.nameThreadMap.get(approvalRequestMessage.username).bufferedWriter, message);
                 }
+            } else if (message instanceof KickMessage kickMessage) {
+                if (message.sender.equals(server.manager)) {
+                    writeMsg(server.nameThreadMap.get(kickMessage.username).bufferedWriter, kickMessage);
+                }
+            } else if (message instanceof RefuseRequestMessage refuseRequestMessage) {
+                writeMsg(server.nameThreadMap.get(refuseRequestMessage.username).bufferedWriter, message);
+                server.nameThreadMap.remove(refuseRequestMessage.username);
             } else {
                 for (String u : server.nameThreadMap.keySet()) {
                     writeMsg(server.nameThreadMap.get(u).bufferedWriter, message);

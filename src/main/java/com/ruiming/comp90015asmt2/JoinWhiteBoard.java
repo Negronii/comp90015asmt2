@@ -68,7 +68,10 @@ public class JoinWhiteBoard extends Application {
             Message msg = readMsg(bufferedReader);
             System.out.println("Please wait for manager to approve");
             if (msg instanceof ApprovalRequestMessage) launch();
-            else if (msg instanceof RefuseRequestMessage) System.exit(0);
+            else if (msg instanceof RefuseRequestMessage) {
+                System.out.println("You are refused");
+                System.exit(0);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

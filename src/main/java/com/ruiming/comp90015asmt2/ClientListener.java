@@ -8,9 +8,11 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
@@ -24,6 +26,7 @@ import java.time.format.DateTimeFormatter;
 
 import static com.ruiming.comp90015asmt2.Messages.MessageFactory.readMsg;
 import static com.ruiming.comp90015asmt2.Messages.MessageFactory.writeMsg;
+import static com.ruiming.comp90015asmt2.WhiteBoardController.*;
 import static com.ruiming.comp90015asmt2.WhiteBoardController.date;
 
 public class ClientListener extends Thread {
@@ -66,6 +69,12 @@ public class ClientListener extends Thread {
                 g.fillPolygon(drawTriangleMessage.triangleXs, drawTriangleMessage.triangleYs, 3);
             } else if (message instanceof EraseMessage eraseMessage) {
                 g.clearRect(eraseMessage.x, eraseMessage.y, eraseMessage.brushSize, eraseMessage.brushSize);
+            } else if (message instanceof KickMessage) {
+                this.interrupt();
+                Platform.runLater(() -> {
+                    whiteBoardController.showAlert("Exit Message", "Manager kicked you from white board");
+                    whiteBoardController.onExit();
+                });
             } else if (message instanceof QuitMessage) {
                 if (message.sender.equals(manager))
                     Platform.runLater(() -> {
@@ -84,11 +93,22 @@ public class ClientListener extends Thread {
                 hBox.setAlignment(Pos.CENTER);
                 hBox.setPadding(new Insets(5, 5, 5, 10));
                 Text text = new Text(fetchUserMessage.username);
+                text.setFill(isSelf ? Color.web("A2D2FF") : Color.BLACK);
                 TextFlow textFlow = new TextFlow(text);
-                textFlow.setStyle("-fx-color: black; -fx-background-color: White; -fx-background-radius: 20;");
+                textFlow.setStyle("-fx-background-color: White; -fx-background-radius: 20;");
                 textFlow.setPadding(new Insets(5, 10, 5, 10));
-                if (!isSelf) hBox.getChildren().add(new Text("Me: "));
                 hBox.getChildren().add(textFlow);
+                if (isManager && !fetchUserMessage.username.equals(whiteBoardController.username)) {
+                    Button button = new Button("Kick");
+                    button.setStyle("-fx-text-fill: White; -fx-background-color: #3A86FF; -fx-background-radius: 20; -fx-font-size: 12;");
+                    button.setPadding(new Insets(5, 10, 5, 10));
+                    button.setAlignment(Pos.CENTER_RIGHT);
+                    button.setOnMouseEntered(e -> button.setEffect(new DropShadow()));
+                    button.setOnMouseExited(e -> button.setEffect(null));
+                    button.setOnAction(e -> writeMsg(bufferedWriter, new KickMessage(whiteBoardController.username, fetchUserMessage.username)));
+                    hBox.setSpacing(10);
+                    hBox.getChildren().add(button);
+                }
                 Platform.runLater(() -> whiteBoardController.vbox_user.getChildren().add(hBox));
             } else if (message instanceof FetchRequestMessage) {
                 Platform.runLater(() -> {
@@ -130,6 +150,7 @@ public class ClientListener extends Thread {
                     window.initModality(Modality.APPLICATION_MODAL); //make user deal with alert first
                     window.setTitle("new User Join Request");
                     window.setWidth(250);
+                    window.setHeight(150);
                     Label label = new Label();
                     label.setText(message.sender + " want to join the white board");
                     Button acceptButton = new Button();
@@ -141,7 +162,7 @@ public class ClientListener extends Thread {
                     Button closeButton = new Button();
                     closeButton.setText("Refuse");
                     closeButton.setOnAction(e -> {
-                        writeMsg(bufferedWriter, new RefuseRequestMessage(whiteBoardController.username));
+                        writeMsg(bufferedWriter, new RefuseRequestMessage(whiteBoardController.username, message.sender));
                         window.close();
                     });
 

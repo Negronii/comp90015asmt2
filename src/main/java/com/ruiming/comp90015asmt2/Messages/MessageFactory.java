@@ -58,9 +58,9 @@ public class MessageFactory {
             // a fetch user message should be "user,sender,userName"
             case "user" -> new FetchUserMessage(split[1], split[2]);
             // an error message should be "error,Sender,errorMsg"
-            case "error" -> new ErrorMessage(split[1],  split[2]);
+            case "error" -> new ErrorMessage(split[1], split[2]);
             // a refuse message should be "refuse,sender"
-            case "refuse" -> new RefuseRequestMessage(split[1]);
+            case "refuse" -> new RefuseRequestMessage(split[1], split[2]);
             // a clear screen message should be "clear,sender"
             case "clear" -> new ClearPanelMessage(split[1]);
             // a fetch request should be "fetch,sender"
@@ -68,8 +68,8 @@ public class MessageFactory {
             // a image message should be "image,sender,encodedString"
             case "image" -> new ImageMessage(split[1], ImageMessage.decodeToImage(split[2]));
             // a fetch image message should be "fetchImage,sender,encodedString,targetUsername"
-            case "fetchImage" ->
-                    new FetchReplyMessage(split[1], ImageMessage.decodeToImage(split[2]), split[3]);
+            case "fetchImage" -> new FetchReplyMessage(split[1], ImageMessage.decodeToImage(split[2]), split[3]);
+            case "kick" -> new KickMessage(split[1], split[2]);
             default -> null;
         };
     }
