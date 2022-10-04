@@ -20,8 +20,8 @@ public class MessageFactory {
         return switch (split[0]) {
             // an approval message should be "approval,sender,username"
             case "approval" -> new ApprovalRequestMessage(split[1], split[2]);
-            // a chat message should be "chat,username,timeStamp,text"
-            case "chat" -> new ChatMessage(split[1], split[2]);
+            // a chat message should be "chat,username,text"
+            case "chat" -> new ChatMessage(split[1], s.substring(6 + split[1].length()));
             // a creation message should be "create,username"
             case "create" -> new CreateRequestMessage(split[1]);
             // a draw circle message should be "circle,username,x,y,width,height,color"
@@ -69,11 +69,17 @@ public class MessageFactory {
             case "image" -> new ImageMessage(split[1], ImageMessage.decodeToImage(split[2]));
             // a fetch image message should be "fetchImage,sender,encodedString,targetUsername"
             case "fetchImage" -> new FetchReplyMessage(split[1], ImageMessage.decodeToImage(split[2]), split[3]);
+            // a kick message should be "sender,username"
             case "kick" -> new KickMessage(split[1], split[2]);
             default -> null;
         };
     }
 
+    /**
+     * A method to write message using an indicated buffered writer
+     * @param bufferedWriter bufferedWriter got from socket input stream
+     * @param msg the Message to send
+     */
     public static void writeMsg(BufferedWriter bufferedWriter, Message msg) {
         try {
             System.out.println("sending: " + msg.toString());
@@ -85,6 +91,11 @@ public class MessageFactory {
         }
     }
 
+    /**
+     * A method to read message using an indicated buffered reader
+     * @param bufferedReader the buffered reader from the socket output stream
+     * @return the decoded message read from output stream
+     */
     public static Message readMsg(BufferedReader bufferedReader) {
         try {
             String s = bufferedReader.readLine();

@@ -3,6 +3,7 @@ package com.ruiming.comp90015asmt2;
 import com.ruiming.comp90015asmt2.Messages.*;
 
 import java.io.*;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -12,14 +13,54 @@ import static com.ruiming.comp90015asmt2.Messages.MessageFactory.readMsg;
 import static com.ruiming.comp90015asmt2.Messages.MessageFactory.writeMsg;
 
 public class Server extends Thread {
-    private final int timeout;
+
+    // a deque to store sockets brought by ioThread
     private final LinkedBlockingDeque<Socket> socketDeque;
+
+    // ioThread listening on port and offer socket to deque
     private final IOThread ioThread;
+
+    // the manager of the whiteboard
     public String manager;
+
+    // Username: ServerListener map
     public Map<String, ServerConnection> nameThreadMap;
 
+    // ioThread listening on port and offer socket to deque
+    class IOThread extends Thread {
+        private ServerSocket serverSocket;
+        private LinkedBlockingDeque<Socket> incomingConnections;
+
+        public IOThread(int port,
+                        LinkedBlockingDeque<Socket> incomingConnections) throws IOException {
+            this.incomingConnections = incomingConnections;
+            serverSocket = new ServerSocket(port);
+        }
+
+        @Override
+        public void run() {
+            System.out.println("IO thread running");
+            while (!isInterrupted()) {
+                try {
+                    Socket socket = serverSocket.accept();
+                    try {
+                        if (!incomingConnections.offer(socket)) {
+                            socket.close();
+                            System.out.println("IO thread dropped connection - incoming connection queue is full.");
+                        }
+                    } catch (IOException e) {
+                        System.out.println("Something went wrong with the connection.");
+                    }
+                } catch (IOException e) {
+                    System.out.println("IO thread failed to accept.");
+                    break;
+                }
+            }
+            System.out.println("IO thread completed.");
+        }
+    }
+
     public Server(int port) throws IOException {
-        timeout = 500000;
         socketDeque = new LinkedBlockingDeque<>();
         nameThreadMap = new HashMap<>();
         ioThread = new IOThread(port, socketDeque);
@@ -59,6 +100,8 @@ public class Server extends Thread {
 
         // read the message and deal with each message time
         Message msg = readMsg(bufferedReader);
+
+        // if the username is occupied, write message and close socket
         if (nameThreadMap.containsKey(msg.sender)) {
             writeMsg(bufferedWriter, new ErrorMessage("Server", "username occupied"));
             socket.close();
@@ -71,13 +114,13 @@ public class Server extends Thread {
                 return;
             }
             manager = msg.sender;
-            ServerConnection serverConnection = new ServerConnection(socket, msg.sender, bufferedReader, bufferedWriter, this);
+            ServerConnection serverConnection = new ServerConnection(msg.sender, bufferedReader, bufferedWriter, this);
             serverConnection.isApproved = true;
             nameThreadMap.put(msg.sender, serverConnection);
             serverConnection.start();
             writeMsg(bufferedWriter, new FetchUserMessage("System", manager));
         } else if (msg instanceof JoinRequestMessage) {
-            ServerConnection serverConnection = new ServerConnection(socket, msg.sender, bufferedReader, bufferedWriter, this);
+            ServerConnection serverConnection = new ServerConnection(msg.sender, bufferedReader, bufferedWriter, this);
             nameThreadMap.put(msg.sender, serverConnection);
             serverConnection.start();
             writeMsg(nameThreadMap.get(manager).bufferedWriter, msg);

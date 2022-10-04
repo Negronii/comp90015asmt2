@@ -20,11 +20,18 @@ import java.util.Date;
 import static com.ruiming.comp90015asmt2.Messages.MessageFactory.*;
 
 public class CreateWhiteBoard extends Application {
+
+    // primary stage
     public static Stage window;
+
+    // reader/writer from input/output socket streams
     public static BufferedReader bufferedReader;
     public static BufferedWriter bufferedWriter;
+
+    // the current user's username
     public static String username;
 
+    // the client listener listening message from server
     ClientListener clientListener;
 
     static Socket socket;
@@ -34,6 +41,7 @@ public class CreateWhiteBoard extends Application {
         WhiteBoardController.isManager = true;
         // main stage
         window = stage;
+
         // load fxml
         FXMLLoader fxmlLoader = new FXMLLoader(CreateWhiteBoard.class.getResource("WhiteBoardView.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 1000, 600);
@@ -41,21 +49,28 @@ public class CreateWhiteBoard extends Application {
         window.setScene(scene);
         window.show();
 
+        // create client listener for further messages
         clientListener = new ClientListener(bufferedReader, bufferedWriter, fxmlLoader.getController());
         clientListener.start();
     }
 
     @Override
     public void stop() throws IOException {
+        // send quit message to everyone
         writeMsg(bufferedWriter, new QuitMessage(username));
+        // interrupt client clientListener
         clientListener.interrupt();
+        // close socket
         socket.close();
     }
 
     public static void main(String[] args) throws UnknownHostException {
+        // read arg values
         username = args[0];
         InetAddress idxAddress = InetAddress.getByName(args[1]);
         int idxPort = Integer.parseInt(args[2]);
+
+        // start socket and send create message to server
         try {
             socket = new Socket(idxAddress, idxPort);
             // set up reader and writer for IO stream
@@ -68,6 +83,7 @@ public class CreateWhiteBoard extends Application {
             e.printStackTrace();
         }
 
+        // launch app
         launch();
     }
 
