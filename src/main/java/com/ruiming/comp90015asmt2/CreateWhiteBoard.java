@@ -78,6 +78,7 @@ public class CreateWhiteBoard extends Application {
             else if (message instanceof ErrorMessage errorMessage){
                 socket.close();
                 System.out.println(errorMessage.errorMsg);
+                System.exit(0);
             }
         } catch (IOException e) {
             e.printStackTrace();

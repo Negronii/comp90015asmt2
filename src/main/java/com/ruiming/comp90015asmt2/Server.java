@@ -120,7 +120,7 @@ public class Server extends Thread {
             writeMsg(bufferedWriter, new FetchUserMessage("System", manager));
         } else if (msg instanceof JoinRequestMessage) {
             if (nameThreadMap.size() == 0) {
-                writeMsg(bufferedWriter, new ErrorMessage("Server", "server occupied"));
+                writeMsg(bufferedWriter, new ErrorMessage("Server", "Please wait manager creating whiteboard"));
                 return;
             }
             ServerConnection serverConnection = new ServerConnection(msg.sender, bufferedReader, bufferedWriter, this);
