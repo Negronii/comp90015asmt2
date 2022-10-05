@@ -21,6 +21,7 @@ import javafx.stage.Stage;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -59,7 +60,12 @@ public class ClientListener extends Thread {
     public void run() {
         while (!isInterrupted()) {
             // read one piece of message
-            Message message = readMsg(bufferedReader);
+            Message message;
+            try {
+                message = readMsg(bufferedReader);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
             GraphicsContext g = whiteBoardController.canvas.getGraphicsContext2D();
             // deal with different messages
             if (message instanceof DrawRectMessage drawRectMessage) {
@@ -98,6 +104,15 @@ public class ClientListener extends Thread {
                 // if other client quits, remove user from the user list
                 else
                     Platform.runLater(() -> whiteBoardController.removeUser(message.sender));
+                if (message.sender.equals(whiteBoardController.username)) {
+                    this.interrupt();
+                    try {
+                        whiteBoardController.socket.close();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
             } else if (message instanceof ClearPanelMessage) {
                 g.clearRect(0, 0, whiteBoardController.canvas.getWidth(), whiteBoardController.canvas.getHeight());
             } else if (message instanceof ImageMessage imageMessage) {
@@ -124,7 +139,13 @@ public class ClientListener extends Thread {
                     button.setAlignment(Pos.CENTER_RIGHT);
                     button.setOnMouseEntered(e -> button.setEffect(new DropShadow()));
                     button.setOnMouseExited(e -> button.setEffect(null));
-                    button.setOnAction(e -> writeMsg(bufferedWriter, new KickMessage(whiteBoardController.username, fetchUserMessage.username)));
+                    button.setOnAction(e -> {
+                        try {
+                            writeMsg(bufferedWriter, new KickMessage(whiteBoardController.username, fetchUserMessage.username));
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    });
                     hBox.setSpacing(10);
                     hBox.getChildren().add(button);
                 }
@@ -133,7 +154,11 @@ public class ClientListener extends Thread {
             } else if (message instanceof FetchRequestMessage) {
                 Platform.runLater(() -> {
                     Image snapShot = whiteBoardController.canvas.snapshot(null, null);
-                    writeMsg(bufferedWriter, new FetchReplyMessage(whiteBoardController.username, snapShot, message.sender));
+                    try {
+                        writeMsg(bufferedWriter, new FetchReplyMessage(whiteBoardController.username, snapShot, message.sender));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                 });
             } else if (message instanceof FetchReplyMessage fetchReplyMessage) {
                 manager = fetchReplyMessage.sender;

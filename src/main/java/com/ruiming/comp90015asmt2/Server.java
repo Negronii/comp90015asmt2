@@ -104,7 +104,6 @@ public class Server extends Thread {
         // if the username is occupied, write message and close socket
         if (nameThreadMap.containsKey(msg.sender)) {
             writeMsg(bufferedWriter, new ErrorMessage("Server", "username occupied"));
-            socket.close();
             return;
         }
         if (msg instanceof CreateRequestMessage) {

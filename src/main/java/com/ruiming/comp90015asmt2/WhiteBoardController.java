@@ -32,6 +32,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.*;
+import java.net.Socket;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -83,6 +84,8 @@ public class WhiteBoardController implements Initializable {
 
 
     public static boolean isManager = false;
+
+    public Socket socket;
 
     Stage window;
 
@@ -222,7 +225,7 @@ public class WhiteBoardController implements Initializable {
      * clear the canvas
      */
     @FXML
-    public void onNew() {
+    public void onNew() throws IOException {
         canvas.getGraphicsContext2D().clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         writeMsg(bufferedWriter, new ClearPanelMessage(username));
     }
@@ -239,6 +242,7 @@ public class WhiteBoardController implements Initializable {
         bufferedWriter = (isManager) ? CreateWhiteBoard.bufferedWriter : JoinWhiteBoard.bufferedWriter;
         username = (isManager) ? CreateWhiteBoard.username : JoinWhiteBoard.username;
         window = (isManager) ? CreateWhiteBoard.window : JoinWhiteBoard.window;
+        socket = (isManager) ? CreateWhiteBoard.socket : JoinWhiteBoard.socket;
         tool.getItems().addAll("Free-hand", "Eraser", "Line", "Circle", "Triangle", "Rectangle", "Text");
 
         // text input should not appear when selecting other tools
@@ -257,7 +261,11 @@ public class WhiteBoardController implements Initializable {
                         stringBuilder.append(c);
                 toSend = stringBuilder.toString();
                 if (!toSend.isEmpty() && !toSend.equals("\n")) {
-                    writeMsg(bufferedWriter, new ChatMessage(username, toSend));
+                    try {
+                        writeMsg(bufferedWriter, new ChatMessage(username, toSend));
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
                     textEntered.clear();
                 }
             }
@@ -290,13 +298,21 @@ public class WhiteBoardController implements Initializable {
                     else {
                         Color color = colorPicker.getValue();
                         double size = slider.getValue();
-                        writeMsg(bufferedWriter, new DrawLineMessage(username, point[0],
-                                point[1], x, y, size, color));
+                        try {
+                            writeMsg(bufferedWriter, new DrawLineMessage(username, point[0],
+                                    point[1], x, y, size, color));
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        }
                     }
                     point[0] = x;
                     point[1] = y;
                 } else if (tool.getValue().equals("Eraser")) {
-                    writeMsg(bufferedWriter, new EraseMessage(username, x, y, brushSize));
+                    try {
+                        writeMsg(bufferedWriter, new EraseMessage(username, x, y, brushSize));
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
                 }
             }
         });
@@ -319,33 +335,53 @@ public class WhiteBoardController implements Initializable {
                     double startY = Math.min(point[1], y);
                     Color color = colorPicker.getValue();
                     if (tool.getValue().equals("Rectangle")) {
-                        writeMsg(bufferedWriter, new DrawRectMessage(username,
-                                startX, startY, width, height, color));
+                        try {
+                            writeMsg(bufferedWriter, new DrawRectMessage(username,
+                                    startX, startY, width, height, color));
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        }
                     }
                     if (tool.getValue().equals("Circle")) {
-                        writeMsg(bufferedWriter, new DrawCircleMessage(username,
-                                startX, startY, width, height, color));
+                        try {
+                            writeMsg(bufferedWriter, new DrawCircleMessage(username,
+                                    startX, startY, width, height, color));
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        }
                     }
 
                 } else if (tool.getValue().equals("Line")) {
                     Color color = colorPicker.getValue();
                     double size = slider.getValue();
-                    writeMsg(bufferedWriter, new DrawLineMessage(username, point[0],
-                            point[1], x, y, size, color));
+                    try {
+                        writeMsg(bufferedWriter, new DrawLineMessage(username, point[0],
+                                point[1], x, y, size, color));
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
                 } else if (tool.getValue().equals("Triangle")) {
                     triangleXs[triangleCount] = x;
                     triangleYs[triangleCount] = y;
                     if (++triangleCount == 3) {
-                        writeMsg(bufferedWriter, new DrawTriangleMessage(username,
-                                triangleXs, triangleYs, colorPicker.getValue()));
+                        try {
+                            writeMsg(bufferedWriter, new DrawTriangleMessage(username,
+                                    triangleXs, triangleYs, colorPicker.getValue()));
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        }
                         triangleCount = 0;
                     }
                 } else if (tool.getValue().equals("Text")) {
                     if (textInput.getText().equals("")) {
                         showAlert("No text entered", "Please enter text field besides slider");
                     } else {
-                        writeMsg(bufferedWriter, new DrawTextMessage(username, x, y,
-                                textInput.getText(), colorPicker.getValue(), slider.getValue()));
+                        try {
+                            writeMsg(bufferedWriter, new DrawTextMessage(username, x, y,
+                                    textInput.getText(), colorPicker.getValue(), slider.getValue()));
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        }
                     }
                 } else if (tool.getValue().equals("Free-hand")) {
                     Arrays.fill(point, 0);
@@ -398,13 +434,21 @@ public class WhiteBoardController implements Initializable {
         Button acceptButton = new Button();
         acceptButton.setText("Accept");
         acceptButton.setOnAction(e -> {
-            writeMsg(bufferedWriter, new ApprovalRequestMessage(username, message.sender));
+            try {
+                writeMsg(bufferedWriter, new ApprovalRequestMessage(username, message.sender));
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
             window.close();
         });
         Button closeButton = new Button();
         closeButton.setText("Refuse");
         closeButton.setOnAction(e -> {
-            writeMsg(bufferedWriter, new RefuseRequestMessage(username, message.sender));
+            try {
+                writeMsg(bufferedWriter, new RefuseRequestMessage(username, message.sender));
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
             window.close();
         });
         VBox layout = new VBox(10);

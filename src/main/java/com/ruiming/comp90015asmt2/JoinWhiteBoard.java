@@ -62,10 +62,6 @@ public class JoinWhiteBoard extends Application {
     public void stop() throws IOException {
         // send quit message to everyone
         writeMsg(bufferedWriter, new QuitMessage(username));
-        // interrupt client clientListener
-        clientListener.interrupt();
-        // close socket
-        socket.close();
     }
 
     public static void main(String[] args) throws UnknownHostException {
@@ -91,6 +87,10 @@ public class JoinWhiteBoard extends Application {
             // otherwise print message and exit
             else if (msg instanceof RefuseRequestMessage) {
                 System.out.println("You are refused");
+                System.exit(0);
+            } else if (msg instanceof ErrorMessage) {
+                socket.close();
+                System.out.println("Username occupied");
                 System.exit(0);
             }
         } catch (IOException e) {

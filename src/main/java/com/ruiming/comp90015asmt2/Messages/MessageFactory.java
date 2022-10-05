@@ -77,38 +77,33 @@ public class MessageFactory {
 
     /**
      * A method to write message using an indicated buffered writer
+     *
      * @param bufferedWriter bufferedWriter got from socket input stream
-     * @param msg the Message to send
+     * @param msg            the Message to send
      */
-    public static void writeMsg(BufferedWriter bufferedWriter, Message msg) {
-        try {
-            System.out.println("sending: " + msg.toString());
-            bufferedWriter.write(msg.toString());
-            bufferedWriter.newLine();
-            bufferedWriter.flush();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public static void writeMsg(BufferedWriter bufferedWriter, Message msg) throws IOException {
+        System.out.println("sending: " + msg.toString());
+        bufferedWriter.write(msg.toString());
+        bufferedWriter.newLine();
+        bufferedWriter.flush();
     }
 
     /**
      * A method to read message using an indicated buffered reader
+     *
      * @param bufferedReader the buffered reader from the socket output stream
      * @return the decoded message read from output stream
      */
-    public static Message readMsg(BufferedReader bufferedReader) {
-        try {
-            String s = bufferedReader.readLine();
-            if (s != null) {
-                Message msg = parseMessage(s);
-                System.out.println("received: " + msg.toString());
-                return msg;
-            } else {
-                throw new IOException();
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+    public static Message readMsg(BufferedReader bufferedReader) throws IOException {
+        String s = bufferedReader.readLine();
+        if (s != null) {
+            Message msg = parseMessage(s);
+            System.out.println("received: " + msg.toString());
+            return msg;
+        } else {
+            throw new IOException();
         }
+
 
     }
 }

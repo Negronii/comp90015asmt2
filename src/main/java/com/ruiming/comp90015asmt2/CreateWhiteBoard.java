@@ -34,7 +34,7 @@ public class CreateWhiteBoard extends Application {
     // the client listener listening message from server
     ClientListener clientListener;
 
-    static Socket socket;
+    public static Socket socket;
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -58,10 +58,6 @@ public class CreateWhiteBoard extends Application {
     public void stop() throws IOException {
         // send quit message to everyone
         writeMsg(bufferedWriter, new QuitMessage(username));
-        // interrupt client clientListener
-        clientListener.interrupt();
-        // close socket
-        socket.close();
     }
 
     public static void main(String[] args) throws UnknownHostException {
