@@ -429,6 +429,14 @@ public class WhiteBoardController implements Initializable {
         window.setTitle("new User Join Request");
         window.setWidth(250);
         window.setHeight(150);
+        window.setOnCloseRequest(e -> {
+            try {
+                writeMsg(bufferedWriter, new RefuseRequestMessage(username, message.sender));
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+            window.close();
+        });
         Label label = new Label();
         label.setText(message.sender + " want to join the white board");
         Button acceptButton = new Button();
