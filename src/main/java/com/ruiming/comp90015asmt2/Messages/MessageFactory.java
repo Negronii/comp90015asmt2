@@ -18,6 +18,8 @@ public class MessageFactory {
     public static Message parseMessage(String s) {
         String[] split = s.split(",");
         return switch (split[0]) {
+            // a welcome message should be "welcome, server"
+            case "welcome" -> new WelcomeMessage();
             // an approval message should be "approval,sender,username"
             case "approval" -> new ApprovalRequestMessage(split[1], split[2]);
             // a chat message should be "chat,username,text"

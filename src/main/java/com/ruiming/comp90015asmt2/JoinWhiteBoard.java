@@ -86,11 +86,12 @@ public class JoinWhiteBoard extends Application {
             if (msg instanceof ApprovalRequestMessage) launch();
             // otherwise print message and exit
             else if (msg instanceof RefuseRequestMessage) {
+                socket.close();
                 System.out.println("You are refused");
                 System.exit(0);
-            } else if (msg instanceof ErrorMessage) {
+            } else if (msg instanceof ErrorMessage errorMessage) {
                 socket.close();
-                System.out.println("Username occupied");
+                System.out.println(errorMessage.errorMsg);
                 System.exit(0);
             }
         } catch (IOException e) {

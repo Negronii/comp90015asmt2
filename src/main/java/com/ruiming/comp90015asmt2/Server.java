@@ -109,9 +109,9 @@ public class Server extends Thread {
         if (msg instanceof CreateRequestMessage) {
             if (nameThreadMap.size() > 0) {
                 writeMsg(bufferedWriter, new ErrorMessage("Server", "server occupied"));
-                socket.close();
                 return;
             }
+            writeMsg(bufferedWriter, new WelcomeMessage());
             manager = msg.sender;
             ServerConnection serverConnection = new ServerConnection(msg.sender, bufferedReader, bufferedWriter, this);
             serverConnection.isApproved = true;
@@ -119,6 +119,10 @@ public class Server extends Thread {
             serverConnection.start();
             writeMsg(bufferedWriter, new FetchUserMessage("System", manager));
         } else if (msg instanceof JoinRequestMessage) {
+            if (nameThreadMap.size() == 0) {
+                writeMsg(bufferedWriter, new ErrorMessage("Server", "server occupied"));
+                return;
+            }
             ServerConnection serverConnection = new ServerConnection(msg.sender, bufferedReader, bufferedWriter, this);
             nameThreadMap.put(msg.sender, serverConnection);
             serverConnection.start();
